@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Earth Case Files — Be an Earth system trend detective</title>
+  <meta name="description" content="Click anywhere on Earth and investigate 35 years of real NASA climate data. Get a verdict and recommended actions for that place.">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Earth Case Files">
+  <meta property="og:description" content="Click anywhere on Earth and investigate 35 years of real NASA climate data. Get a verdict and recommended actions.">
+  <meta property="og:image" content="assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Earth Case Files">
+  <meta name="twitter:description" content="Click anywhere on Earth and investigate 35 years of real NASA climate data.">
+  <meta name="twitter:image" content="assets/og-image.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <img class="logo" src="assets/logo.png" alt="Earth Case Files logo: magnifying glass over a globe with an amber ring" width="52" height="52">
+      <div class="brand-text">
+        <p class="mission-pill">Earth System Trend Detective</p>
+        <h1>Earth Case Files</h1>
+        <p class="tagline">You are the detective. Tap anywhere on Earth and investigate 36 years of real NASA climate data — then get a verdict and what to do next.</p>
+        <p class="tagline-short">Tap the map to open a case file.</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="epic-wrap" id="epicWrap" hidden>
+        <img id="epicImg" alt="Whole Earth photographed today by the EPIC camera on DSCOVR" width="64" height="64">
+        <p class="epic-caption" id="epicCaption">Earth today</p>
+      </div>
+      <p class="hint" id="hintText">Tap or click anywhere on Earth to open a case file</p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="map-wrap" aria-label="Earth map">
+      <div id="map" role="application" aria-label="Interactive Earth map. Click to investigate a place. Use keyboard to move the map, then press Enter to open a case file at the centre."></div>
+      <div class="sat-controls" aria-label="Satellite layer controls">
+        <button type="button" class="sat-toggle" id="satToggle" aria-expanded="true" aria-controls="satBody">Satellite options</button>
+        <div class="sat-body" id="satBody">
+          <div class="sat-row">
+            <label for="satSelect">Satellite layer</label>
+            <select id="satSelect" aria-label="Satellite layer">
+              <option value="none" selected>None — dark basemap only</option>
+              <option value="truecolor">True color — MODIS Terra</option>
+              <option value="ndvi">Vegetation (NDVI) — MODIS Terra monthly</option>
+            </select>
+          </div>
+          <div class="sat-row sat-date-row" id="satDateRow" hidden>
+            <label for="satDateRange">Date</label>
+            <input type="range" id="satDateRange" aria-label="Satellite date slider, covers the last 4 years">
+            <input type="date" id="satDateInput" aria-label="Satellite date">
+            <output id="satDateLabel" for="satDateRange">—</output>
+          </div>
+          <p class="sat-note" id="satNote" hidden></p>
+        </div>
+      </div>
+      <div class="map-legend" id="mapLegend" hidden aria-label="Place legend">
+        <span class="legend-item"><span class="legend-dot dot-a" aria-hidden="true"></span> Place A</span>
+        <span class="legend-item" id="legendB" hidden><span class="legend-dot dot-b" aria-hidden="true"></span> Place B</span>
+      </div>
+    </section>
+
+    <aside class="panel" id="panel" aria-live="polite" aria-label="Case file panel">
+      <div class="panel-head">
+        <p class="detective-kicker">Detective case file</p>
+        <h2 id="panelTitle">Case file</h2>
+        <p class="panel-coords" id="panelCoords">No place selected yet</p>
+        <ol class="detective-steps" aria-label="How to investigate">
+          <li><strong>1.</strong> Tap the map</li>
+          <li><strong>2.</strong> Read the evidence</li>
+          <li><strong>3.</strong> Get the verdict</li>
+        </ol>
+        <div class="panel-controls">
+          <label class="compare-toggle" for="compareToggle">
+            <input type="checkbox" id="compareToggle">
+            <span>Compare two</span>
+          </label>
+          <fieldset class="view-toggle" aria-label="Chart time view">
+            <legend>View</legend>
+            <label><input type="radio" name="view" value="yearly" checked> Yearly</label>
+            <label><input type="radio" name="view" value="monthly"> Monthly</label>
+          </fieldset>
+        </div>
+        <p class="compare-hint" id="compareHint" hidden>Tap a second place on the map to set Place B.</p>
+      </div>
+
+      <div class="presets" aria-label="Cold case presets">
+        <h3>Cold cases — start here</h3>
+        <p class="presets-help">Tap a place to fly there and open its case file.</p>
+        <div class="chips" id="presetChips" role="group" aria-label="Preset places"></div>
+      </div>
+
+      <div class="panel-status" id="panelStatus">
+        <div class="empty-state" id="emptyState">
+          <p><strong>Your mission:</strong> be an Earth system trend detective. Tap anywhere on the map — or pick a cold case above — and the app pulls 1990 to the latest full year from NASA POWER.</p>
+          <p>Four tabs cover temperature, rainfall, sunlight and humidity. Each chart shows the observed line and a dashed trend line, with evidence cards and a written verdict.</p>
+        </div>
+        <div class="loading-state" id="loadingState" hidden>
+          <span class="spinner" aria-hidden="true"></span>
+          <p id="loadingText">Opening case file…</p>
+        </div>
+        <div class="error-state" id="errorState" hidden>
+          <h3>Case file could not be opened</h3>
+          <p id="errorMessage">Something went wrong.</p>
+          <p class="error-fix">What to try: check your connection, then press Retry. If the problem continues, pick a different place or try again in a minute.</p>
+          <button type="button" id="retryButton">Retry</button>
+        </div>
+      </div>
+
+      <div class="case-content" id="caseContent" hidden>
+        <div class="tabs" role="tablist" aria-label="Climate variables">
+          <button type="button" role="tab" id="tab-T2M" aria-selected="true" aria-controls="tabPanel" data-param="T2M">Temperature</button>
+          <button type="button" role="tab" id="tab-PRECTOTCORR" aria-selected="false" aria-controls="tabPanel" data-param="PRECTOTCORR" tabindex="-1">Rainfall</button>
+          <button type="button" role="tab" id="tab-ALLSKY_SFC_SW_DWN" aria-selected="false" aria-controls="tabPanel" data-param="ALLSKY_SFC_SW_DWN" tabindex="-1">Sunlight</button>
+          <button type="button" role="tab" id="tab-RH2M" aria-selected="false" aria-controls="tabPanel" data-param="RH2M" tabindex="-1">Humidity</button>
+        </div>
+
+        <div class="tab-panel" role="tabpanel" id="tabPanel" aria-labelledby="tab-T2M" tabindex="0">
+          <div class="chart-wrap">
+            <canvas id="chart" aria-label="Climate trend chart. Observed values with a dashed trend line. Use the evidence cards below for the numbers in text." role="img"></canvas>
+            <p class="chart-fallback" id="chartFallback" hidden></p>
+            <p class="chart-note" id="chartNote"></p>
+          </div>
+
+          <section class="evidence" aria-label="Evidence for Place A">
+            <h3 id="cardsTitleA">Evidence — Place A</h3>
+            <div class="cards" id="cardsA">
+              <article class="card">
+                <h4>Trend per decade</h4>
+                <p class="card-value" id="trendA">—</p>
+                <p class="card-sub" id="trendSubA">Least-squares fit on yearly means</p>
+              </article>
+              <article class="card">
+                <h4>Anomaly</h4>
+                <p class="card-value" id="anomalyA">—</p>
+                <p class="card-sub" id="anomalySubA">Last 10 years minus 1990–2000</p>
+              </article>
+              <article class="card">
+                <h4>Latest full year</h4>
+                <p class="card-value" id="latestA">—</p>
+                <p class="card-sub" id="latestSubA">—</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="evidence" id="evidenceB" aria-label="Evidence for Place B" hidden>
+            <h3 id="cardsTitleB">Evidence — Place B</h3>
+            <div class="cards" id="cardsB">
+              <article class="card">
+                <h4>Trend per decade</h4>
+                <p class="card-value" id="trendB">—</p>
+                <p class="card-sub" id="trendSubB">Least-squares fit on yearly means</p>
+              </article>
+              <article class="card">
+                <h4>Anomaly</h4>
+                <p class="card-value" id="anomalyB">—</p>
+                <p class="card-sub" id="anomalySubB">Last 10 years minus 1990–2000</p>
+              </article>
+              <article class="card">
+                <h4>Latest full year</h4>
+                <p class="card-value" id="latestB">—</p>
+                <p class="card-sub" id="latestSubB">—</p>
+              </article>
+            </div>
+          </section>
+
+          <article class="story" id="storyA" aria-label="Case file story for Place A">
+            <h3 id="storyTitleA">Case file — Place A</h3>
+            <p class="story-hook" id="hookA">—</p>
+            <div class="story-evidence" id="evidenceTextA"></div>
+            <h4>What to do</h4>
+            <ul id="actionsA"></ul>
+          </article>
+
+          <article class="story" id="storyB" aria-label="Case file story for Place B" hidden>
+            <h3 id="storyTitleB">Case file — Place B</h3>
+            <p class="story-hook" id="hookB">—</p>
+            <div class="story-evidence" id="evidenceTextB"></div>
+            <h4>What to do</h4>
+            <ul id="actionsB"></ul>
+          </article>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="site-footer">
+    <div class="badges" aria-label="NASA data sources">
+      <span class="badge">NASA POWER</span>
+      <span class="badge">NASA GIBS</span>
+      <span class="badge">NASA EPIC</span>
+    </div>
+    <p class="footer-note">Trends are least-squares fits on yearly means. This is not an official NASA product. Climate data: NASA POWER (1990 to latest full year). Imagery: NASA GIBS MODIS Terra. Earth photo: NASA EPIC on DSCOVR. Get a key at <a href="https://api.nasa.gov" target="_blank" rel="noopener">api.nasa.gov</a>.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="env.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

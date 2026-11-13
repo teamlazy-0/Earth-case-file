@@ -1,0 +1,24 @@
+Earth Case Files — 60-second demo narration script
+Hero place: Bangladesh coast (21.8 N, 90.2 E)
+Numbers are the real NASA POWER values shown by the app for that place (1990-2025).
+
+---
+Along the Bangladesh coast, the question is not whether the climate is changing, but how.
+
+Earth Case Files turns every click into a detective story. Click the coast at twenty-one point eight north, ninety point two east, and the app pulls thirty-six years of real NASA data.
+
+The evidence is stark. Rainfall has risen by two point seven seven millimetres per day per decade. The last ten years averaged eight point zero two millimetres per day wetter than nineteen ninety to two thousand, up two hundred and three percent. The latest full year, twenty twenty-five, averaged ten point one millimetres per day. Temperature, by contrast, is flat at twenty-six point one seven degrees.
+
+The verdict: a wetter trend.
+
+The action: improve drainage, clear culverts, review flood maps, and store valuables above flood level.
+
+One click, real NASA evidence, a clear verdict. That is Earth Case Files.
+---
+
+Word count: ~135 words (about 60 seconds at natural pace).
+Source numbers (NASA POWER, Bangladesh coast):
+- Rainfall trend: +2.771 mm/day per decade
+- Rainfall anomaly: +8.023 mm/day (up 203.0% vs 1990-2000)
+- Rainfall latest (2025): 10.10 mm/day
+- Temperature latest (2025): 26.17 C, trend -0.005 C per decade (flat)
